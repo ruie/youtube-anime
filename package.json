@@ -1,0 +1,15 @@
+{
+  "name": "esm",
+  "version": "1.0.0",
+  "description": "Server-side inference with Transformers.js (ESM)",
+  "type": "module",
+  "main": "index.js",
+  "keywords": [],
+  "author": "Xenova",
+  "license": "ISC",
+  "dependencies": {
+    "@huggingface/inference": "^2.6.3",
+    "@xenova/transformers": "^2.6.2",
+    "fetch-blob": "^4.0.0"
+  }
+}
