@@ -17,65 +17,66 @@ async function processImage(imagePath) {
   return response;
 }
 
-async function main() {
-  let scenes = [];
-
-  for (let img of localImages) {
-    const result = await processImage(img);
-    scenes.push(result.generated_text);
-    console.log(result.generated_text);
-
-    let last = scenes.slice(-1)[0];
-
-    const similar = await hf.sentenceSimilarity({
-      model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
-      inputs: {
-        source_sentence: last,
-        sentences: scenes,
-      },
-    });
-    // console.log(img, similar);
-  }
-}
-
 // async function main() {
 //   let scenes = [];
-//   let processedImages = [];
 
 //   for (let img of localImages) {
 //     const result = await processImage(img);
-//     const currentCaption = result.generated_text;
+//     scenes.push(result.generated_text);
+//     console.log(result.generated_text);
 
-//     if (scenes.length > 0) {
-//       const similar = await hf.sentenceSimilarity({
-//         model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
-//         inputs: {
-//           source_sentence: currentCaption,
-//           sentences: scenes,
-//         },
-//       });
+//     let last = scenes.slice(-1)[0];
 
-//       // Check similarity scores
-//       let isDuplicate = false;
-//       for (let score of similar.scores) {
-//         if (score > 0.95) {
-//           // Adjust this threshold as needed
-//           isDuplicate = true;
-//           break;
-//         }
-//       }
-
-//       if (isDuplicate) {
-//         continue; // Skip this image as it's similar to a previous one
-//       }
-//     }
-
-//     scenes.push(currentCaption);
-//     processedImages.push(img);
+//     const similar = await hf.sentenceSimilarity({
+//       model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+//       inputs: {
+//         source_sentence: last,
+//         sentences: scenes,
+//       },
+//     });
+//     // console.log(img, similar);
 //   }
-
-//   console.log("Unique images based on captions:", processedImages);
 // }
+
+async function main() {
+  let scenes = [];
+  let processedImages = [];
+
+  for (let img of localImages) {
+    const result = await processImage(img);
+    const currentCaption = result.generated_text;
+    console.log(currentCaption);
+
+    if (scenes.length > 0) {
+      const similar = await hf.sentenceSimilarity({
+        model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+        inputs: {
+          source_sentence: currentCaption,
+          sentences: scenes,
+        },
+      });
+
+      // Check similarity scores
+      let isDuplicate = false;
+      for (let score of similar) {
+        if (score > 0.85) {
+          // Adjust this threshold as needed
+          isDuplicate = true;
+          break;
+        }
+      }
+
+      if (isDuplicate) {
+        continue; // Skip this image as it's similar to a previous one
+      }
+    }
+
+    scenes.push(currentCaption);
+    processedImages.push(img);
+  }
+
+  console.log("Unique images based on captions:", processedImages);
+}
 
 main().catch((error) => {
   console.error("Error processing images:", error);
